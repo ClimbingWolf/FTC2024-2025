@@ -48,38 +48,17 @@ import java.util.ArrayList;
 import java.io.File;
 import java.util.Scanner;
 
-@Autonomous(name = "RedAutoFar")
+@Autonomous(name = "WriteFile")
 @Config
-public class RedAutoFar extends LinearOpMode {
+public class WriteFile extends LinearOpMode {
 
     private BNO055IMU imu;
     @Override
     public void runOpMode() {
-        TelemetryPacket packet = new TelemetryPacket();
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.loggingEnabled = false;
-
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-
-        imu.initialize(parameters);
+        String fullString = "";
+        writeToFile(fullString, "autoData.txt");
     }
 
-    public double rotateX(double x, double y, double thetaRadians){
-        return x*Math.cos(thetaRadians) - y*Math.sin(thetaRadians);
-    }
-    public double rotateY(double x, double y, double thetaRadians){
-        return x*Math.sin(thetaRadians) + y*Math.cos(thetaRadians);
-    }
-
-    // Method 2
     // Main driver method
     public static void writeToFile (String text, String toFileName) {
 

@@ -26,8 +26,17 @@ public class BaseDrive extends LinearOpMode {
     public double rx = 0;
     public static double offsetOrientation = 0;
 
+    public static double fleftMult = 1.0;
+    public static double bleftMult = 1.0;
+
+    public static double frightMult = 1.0;
+
+    public static double brightMult = 1.0;
+
+
     @Override
     public void runOpMode() {
+
         DcMotor bright = hardwareMap.dcMotor.get("bright");
         DcMotor bleft = hardwareMap.dcMotor.get("bleft");
         DcMotor fright = hardwareMap.dcMotor.get("fright");
@@ -36,6 +45,18 @@ public class BaseDrive extends LinearOpMode {
         fright.setDirection(DcMotorSimple.Direction.REVERSE);
         bleft.setDirection(DcMotorSimple.Direction.FORWARD);
         bright.setDirection(DcMotorSimple.Direction.REVERSE);
+        boolean wheelie = false;
+        boolean lock = false;
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configurepd to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
         waitForStart();
         while (opModeIsActive()) {
             //get the rotation of the robot and set it to angles
@@ -46,10 +67,12 @@ public class BaseDrive extends LinearOpMode {
             x = FtcMath.rotateX(gamepad1.left_stick_x, gamepad1.left_stick_y, Math.toRadians(firstAngle));
             rx = gamepad1.left_trigger-gamepad1.right_trigger;
             // basic teleop movement code
-            bright.setPower((y+x-rx)*movementSpeedmultiplier);
-            fleft.setPower((y-x+rx)*movementSpeedmultiplier);
-            fright.setPower((y-x-rx)*movementSpeedmultiplier);
-            bleft.setPower((y+x+rx)*movementSpeedmultiplier);
+            bright.setPower((y+x-rx)*movementSpeedmultiplier * brightMult);
+            fleft.setPower((y-x+rx)*movementSpeedmultiplier * fleftMult);
+            fright.setPower((y-x-rx)*movementSpeedmultiplier * frightMult);
+            bleft.setPower((y+x+rx)*movementSpeedmultiplier * bleftMult);
+            // do an epic wheelie
+
             dashboard.sendTelemetryPacket(packet);
         }
     }

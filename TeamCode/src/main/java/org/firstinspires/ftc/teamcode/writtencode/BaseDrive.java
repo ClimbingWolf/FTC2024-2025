@@ -12,11 +12,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import java.util.ArrayList;
+
 @TeleOp(name = "BaseDriveCode")
 @Config
 public class BaseDrive extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
+
+    public ArmServoHolder armController;
+
+    public static double bottomServoSet = 0;
+    public static double topServoSet = 0;
     public static double movementSpeedmultiplier = 1;
     public FtcDashboard dashboard = FtcDashboard.getInstance();
     public TelemetryPacket packet = new TelemetryPacket();
@@ -33,10 +41,25 @@ public class BaseDrive extends LinearOpMode {
 
     public static double brightMult = 1.0;
 
+    public static double xReach = 0.1;
+    public static double yReach = 0.1;
+
+    public Servo clawServo;
+
+    public ArrayList<Servo> topServos = new ArrayList<>();
+    public ArrayList<Servo> bottomServos = new ArrayList<>();
+
 
     @Override
     public void runOpMode() {
-
+        topServos.add(hardwareMap.servo.get("topRot"));
+        bottomServos.add(hardwareMap.servo.get("bottomRot"));
+        clawServo = hardwareMap.servo.get("claw");
+        //armController = new ArmServoHolder(topServos, bottomServos);
+        //armController.addTopStart(0.95);
+        //armController.addBottomStart(0.265);
+        //armController.addTopEnd(0.5);
+        //armController.addBottomEnd(0.265);
         DcMotor bright = hardwareMap.dcMotor.get("bright");
         DcMotor bleft = hardwareMap.dcMotor.get("bleft");
         DcMotor fright = hardwareMap.dcMotor.get("fright");
@@ -71,9 +94,16 @@ public class BaseDrive extends LinearOpMode {
             fleft.setPower((y-x+rx)*movementSpeedmultiplier * fleftMult);
             fright.setPower((y-x-rx)*movementSpeedmultiplier * frightMult);
             bleft.setPower((y+x+rx)*movementSpeedmultiplier * bleftMult);
-            // do an epic wheelie
-
             dashboard.sendTelemetryPacket(packet);
+            if(gamepad1.a) {
+                armController.moveToPos(xReach, yReach);
+            }
+            if(gamepad1.b){
+                topServos.get(0).setPosition(topServoSet);
+                bottomServos.get(0).setPosition(bottomServoSet);
+            }
+            armController.outputServoPos();
+
         }
     }
 }

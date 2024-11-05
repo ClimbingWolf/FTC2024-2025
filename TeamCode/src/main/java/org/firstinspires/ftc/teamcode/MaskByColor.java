@@ -63,8 +63,8 @@ public class MaskByColor extends OpenCvPipeline{
     public Scalar upperGray = new Scalar(0,0,0);
     private Scalar lowerYellow = new Scalar(12.8, 80.8, 131.8);
     private Scalar upperYellow = new Scalar(45.3, 255, 255);
-    private Scalar lowerBlue = new Scalar(92.1, 24.1, 68.0);
-    private Scalar upperBlue = new Scalar(161.7, 255, 255);
+    public static Scalar lowerBlue = new Scalar(92.1, 24.1, 68.0);
+    public static Scalar upperBlue = new Scalar(161.7, 255, 255);
     private Scalar lowerRed = new Scalar(145.9, 185.4, 51);
     private Scalar upperRed = new Scalar(228, 242.3, 255);
     private Scalar lowerRed2 = new Scalar(0, 131.8, 79.3);
@@ -86,7 +86,10 @@ public class MaskByColor extends OpenCvPipeline{
 
     public Mat harrisMat = new Mat();
 
+    public ArrayList<Point> centerPoints;
+
     public static double contourArea = 0;
+
 
 
 
@@ -108,7 +111,7 @@ public class MaskByColor extends OpenCvPipeline{
     }
     Telemetry telemetry;
 
-    public MaskByColor(Telemetry telemetry) {
+    public MaskByColor() {
         this.telemetry = telemetry;
     }
 
@@ -217,6 +220,7 @@ public class MaskByColor extends OpenCvPipeline{
         }
 
 
+
         //filteredContours.clear();
         //anglesArr.clear();
         //Imgproc.cvtColor(input, hsvMask, Imgproc.COLOR_RGB2GRAY);
@@ -253,14 +257,15 @@ public class MaskByColor extends OpenCvPipeline{
 
         }
         else if (choice == 1){
-            upperGray.val[0] = 105;
+            upperGray.val[0] = 110;
+            //these kinda differ by light and idk how fix
         }
         else if(choice == 2){
             upperGray.val[0] = 205;
         }
         Core.inRange(normalizedMat, lowerGray, upperGray, endMat);
         //red 0-160
-        //blue 0-111
+        //blue 0-58
         //yellow -200
         //Imgproc.erode(endMat,endMat, erodeKernal);
         Imgproc.dilate(endMat, endMat, erodeKernal);
@@ -275,7 +280,7 @@ public class MaskByColor extends OpenCvPipeline{
         }
 
         //Core.inRange(cornersMat, new Scalar(0,0,0), new Scalar(1,1,1), noCornersBg);
-        ArrayList<Point> centerPoints = getCenterPoint(contours);
+        centerPoints = getCenterPoint(contours);
         //Imgproc.drawContours(input, contours, -1, new Scalar(255,255,0),3);
 
 

@@ -13,11 +13,13 @@ import java.util.ArrayList;
 public class ArmServoHolder {
 
     public Servo topRot;
+    public double rotatorTheta;
+    public double rotatorServoRangeDegrees = 128;
     public FtcDashboard dash = FtcDashboard.getInstance();
 
     public TelemetryPacket packet = new TelemetryPacket();
 
-    public double legLength;
+    public double legLength =8.5;
 
     public double topTheta;
     public double bottomTheta;
@@ -31,15 +33,49 @@ public class ArmServoHolder {
 
     public ArrayList<Servo> topServos;
     public ArrayList<Servo> bottomServos;
+    public ArrayList<Double> rotatorServosEnds;
+    public ArrayList<Double> rotatorServosStarts;
 
+    public ArrayList<Servo> rotatorServos;
     public ArmServoHolder(ArrayList<Servo> topServos, ArrayList<Servo> bottomServos) {
+        this.rotatorServos = rotatorServos;
         this.topServos = topServos;
         this.bottomServos = bottomServos;
-
+        this.bottomServoStarts = new ArrayList<>();
+        this.topServoStarts = new ArrayList<>();
+        this.bottomServoEnds = new ArrayList<>();
+        this.topServoEnds = new ArrayList<>();
+        this.rotatorServos = new ArrayList<>();
+        this.rotatorServosEnds = new ArrayList<>();
+        this.rotatorServosStarts = new ArrayList<>();
+    }
+    public ArmServoHolder(ArrayList<Servo> topServos, ArrayList<Servo> bottomServos, ArrayList<Servo> rotatorServos) {
+        this.rotatorServos = rotatorServos;
+        this.topServos = topServos;
+        this.bottomServos = bottomServos;
+        this.bottomServoStarts = new ArrayList<>();
+        this.topServoStarts = new ArrayList<>();
+        this.bottomServoEnds = new ArrayList<>();
+        this.topServoEnds = new ArrayList<>();
+        this.rotatorServos = rotatorServos;
+        this.rotatorServosEnds = new ArrayList<>();
+        this.rotatorServosStarts = new ArrayList<>();
     }
 
     public void addBottomStart(double value){
         bottomServoStarts.add(value);
+    }
+
+    public void addRotatorStart(double value){
+        rotatorServosStarts.add(value);
+    }
+    public void addRotatorEnd(double value){
+        rotatorServosEnds.add(value);
+    }
+    public void setRotatorPos(double percentage){
+        for (int i = 0; i < topServos.size(); i++) {
+            rotatorServos.get(i).setPosition((rotatorServosEnds.get(i) - rotatorServosStarts.get(i)) * percentage + rotatorServosStarts.get(i));
+        }
     }
     public void addTopStart(double value){
         topServoStarts.add(value);
@@ -64,6 +100,33 @@ public class ArmServoHolder {
         setBottomRot(bottomTheta / (Math.PI / 2));
         setTopRot(topTheta / (Math.PI));
     }
+    public void moveToPos(double x, double y, double z) {
+        double xRotated = Math.sqrt(x*x + z*z);
+        leg3 = Math.sqrt(xRotated * xRotated + y * y);
+        //leg3 is the distance away
+        topTheta = 2 * Math.asin(0.5 * leg3 / legLength);
+        //radians of top angle
+        if (x != 0) {
+            bottomTheta = (Math.PI - topTheta) / 2 + Math.atan(y / xRotated);
+        } else {
+            bottomTheta = Math.PI / 2;
+        }
+        if(z !=0){
+            rotatorTheta = Math.atan(x/z);
+        }
+        else{
+            rotatorTheta = 0;
+        }
+
+        //radians of bottom angle
+        setBottomRot(bottomTheta / (Math.PI / 2));
+        setTopRot(topTheta / (Math.PI));
+        setRotatorPos((rotatorTheta + Math.toRadians(rotatorServoRangeDegrees/2))/rotatorServoRangeDegrees);
+
+    }
+
+
+
 
 
     public void outputConstants() {
@@ -83,23 +146,26 @@ public class ArmServoHolder {
     public void outputServoPos() {
         for (int i = 0; i < topServos.size(); i++) {
             packet.put("topServo" + i, topServos.get(i).getPosition());
+            packet.put("topServo" + i +"Percentage", topTheta / (Math.PI));
         }
         for (int i = 0; i < bottomServos.size(); i++) {
             packet.put("bottomServo" + i, bottomServos.get(i).getPosition());
+            packet.put("bottomServo" + i +"Percentage", bottomTheta / (Math.PI / 2));
         }
+
         dash.sendTelemetryPacket(packet);
 
     }
 
     public void setTopRot(double percentage) {
         for (int i = 0; i < topServos.size(); i++) {
-            topServos.get(i).setPosition(topServoStarts.get(i) + topServoEnds.get(i) * percentage);
+            topServos.get(i).setPosition((topServoEnds.get(i) - topServoStarts.get(i)) * percentage + topServoStarts.get(i));
         }
     }
 
     public void setBottomRot(double percentage) {
         for (int i = 0; i < bottomServos.size(); i++) {
-            bottomServos.get(i).setPosition(bottomServoEnds.get(i) + bottomServoStarts.get(i) * percentage);
+            bottomServos.get(i).setPosition((bottomServoStarts.get(i) - bottomServoEnds.get(i)) * percentage + bottomServoEnds.get(i));
         }
     }
 }

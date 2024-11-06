@@ -16,17 +16,23 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import org.ejml.dense.row.FMatrixComponent;
+import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@TeleOp(name = "BaseDriveCode")
+@TeleOp(name = "WebcamTest")
 @Config
 public class WebcamTest extends LinearOpMode {
+    public ArrayList<Point> centerPoints;
+    public double width = 320;
+    public double height = 240;
     OpenCvWebcam webcam;
     MaskByColor pipeline;
     public void runOpMode() {
@@ -48,6 +54,17 @@ public class WebcamTest extends LinearOpMode {
             public void onError(int errorCode) {}
         });
         while (opModeIsActive()) {
+            centerPoints = pipeline.centerPoints;
+
         }
+
+    }
+    public ArrayList<Point> points2RealPoints(double realWidth, double realHeight, Point camPosRelative2TheCenterOfTheSubmersible, ArrayList<Point> points) {
+        Point camPos = camPosRelative2TheCenterOfTheSubmersible;
+        ArrayList<Point> newPoints = new ArrayList<>();
+        for (int i = 0; i<points.size(); i++){
+            newPoints.add(new Point(points.get(i).x/width * realWidth-camPos.x, points.get(i).y/height * realHeight-camPos.y));
+        }
+        return newPoints;
     }
 }

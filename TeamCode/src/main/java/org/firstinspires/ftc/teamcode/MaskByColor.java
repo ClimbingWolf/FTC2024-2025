@@ -287,7 +287,6 @@ public class MaskByColor extends OpenCvPipeline{
         for (Point point : centerPoints){
             Imgproc.circle(input, point, 2, new Scalar(255,0,0), 5);
         }
-        telemetry.update();
         return input;
 
     }

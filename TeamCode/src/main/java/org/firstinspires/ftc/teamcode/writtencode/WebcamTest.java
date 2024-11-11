@@ -36,7 +36,6 @@ public class WebcamTest extends LinearOpMode {
     OpenCvWebcam webcam;
     MaskByColor pipeline;
     public void runOpMode() {
-        waitForStart();
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         pipeline = new MaskByColor();
@@ -53,9 +52,10 @@ public class WebcamTest extends LinearOpMode {
             @Override
             public void onError(int errorCode) {}
         });
-        while (opModeIsActive()) {
-            centerPoints = pipeline.centerPoints;
+        waitForStart();
 
+        while (opModeIsActive()) {
+            //centerPoints = pipeline.centerPoints;
         }
 
     }

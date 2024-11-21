@@ -24,6 +24,8 @@ package org.firstinspires.ftc.teamcode.lib;
 
 import static com.qualcomm.robotcore.util.TypeConversion.byteArrayToInt;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.PositionVelocityPair;
 import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
@@ -493,7 +495,13 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     /**
      * @return a Pose2D containing the estimated position of the robot
      */
-    public Pose2D getPosition(){
+    public Pose2d getPosition(){
+        return new Pose2d(xPosition,
+                yPosition,
+                hOrientation);
+    }
+
+    public Pose2D pos() {
         return new Pose2D(DistanceUnit.MM,
                 xPosition,
                 yPosition,
@@ -502,18 +510,31 @@ public class GoBildaPinpointDriver extends I2cDeviceSynchDevice<I2cDeviceSynchSi
     }
 
 
-
     /**
      * @return a Pose2D containing the estimated velocity of the robot, velocity is unit per second
      */
-    public Pose2D getVelocity(){
-        return new Pose2D(DistanceUnit.MM,
-                xVelocity,
+    public Pose2d getVelocity(){
+        return new Pose2d(xVelocity,
                 yVelocity,
-                AngleUnit.RADIANS,
                 hVelocity);
     }
 
+    public PositionVelocityPair getPositionVelocityX() {
+        return new PositionVelocityPair(
+                (int) getPosX(),
+                (int) getVelX(),
+                (int) Math.abs(getPosX()),
+                (int) Math.abs(getVelX())
+        );
+    }
 
+    public PositionVelocityPair getPositionVelocityY() {
+        return new PositionVelocityPair(
+                (int) getPosY(),
+                (int) getVelY(),
+                (int) Math.abs(getPosY()),
+                (int) Math.abs(getVelY())
+                );
+    }
 
 }

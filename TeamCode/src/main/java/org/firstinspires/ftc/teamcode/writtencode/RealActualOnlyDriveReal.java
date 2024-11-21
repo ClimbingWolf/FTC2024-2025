@@ -25,9 +25,9 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TestArmPos")
+@TeleOp(name = "RealActualOnlyDriveReal")
 @Config
-public class TestArmPos extends LinearOpMode {
+public class RealActualOnlyDriveReal extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
 
@@ -78,28 +78,6 @@ public class TestArmPos extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new GetColorMaskPoints();
-        webcam.setPipeline(pipeline);
-        pipeline.setChoice(1);//blue
-        pipeline.zReal = yOffsetCam;
-        objPoint = pipeline.realPoint;
-        topServos.add(hardwareMap.servo.get("topServo"));
-        bottomServos.add(hardwareMap.servo.get("leftBottom"));
-        bottomServos.add(hardwareMap.servo.get("rightBottom"));
-        rotatorServos.add(hardwareMap.servo.get("bottomRotator"));
-        //clawServo = hardwareMap.crservo.get("claw");
-        //Declare the armcontroller
-        armController = new ArmServoHolder(topServos, bottomServos, rotatorServos, legLength);
-        armController.addTopStart(0.05);
-        armController.addBottomStart(0.09);//left
-        armController.addBottomStart(1-0.09);//right
-        armController.addTopEnd(0.6);
-        armController.addBottomEnd(0.93);//left
-        armController.addBottomEnd(1-0.93);//right
-        armController.addRotatorStart(0);
-        armController.addRotatorEnd(1);
         DcMotor bright = hardwareMap.dcMotor.get("bright");
         DcMotor bleft = hardwareMap.dcMotor.get("bleft");
         DcMotor fright = hardwareMap.dcMotor.get("fright");
@@ -136,10 +114,6 @@ public class TestArmPos extends LinearOpMode {
             fleft.setPower((y-x+rx)*movementSpeedmultiplier * fleftMult);
             fright.setPower((y+x-rx)*movementSpeedmultiplier * frightMult);
             bleft.setPower((y+x+rx)*movementSpeedmultiplier * bleftMult);
-            dashboard.sendTelemetryPacket(packet);
-            if(gamepad1.a) {
-                armController.moveToPos(objPoint.x + xOffsetCam, yOffsetCam, objPoint.y + zOffsetCam);
-            }
         }
     }
 }

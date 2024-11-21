@@ -30,15 +30,14 @@ import org.openftc.easyopencv.OpenCvWebcam;
 @TeleOp(name = "WebcamTest")
 @Config
 public class WebcamTest extends LinearOpMode {
-    public ArrayList<Point> centerPoints;
-    public double width = 320;
-    public double height = 240;
+    public Point objPoint = new Point();
+
     OpenCvWebcam webcam;
-    MaskByColor pipeline;
+    GetColorMaskPoints pipeline;
     public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new MaskByColor();
+        pipeline = new GetColorMaskPoints();
         webcam.setPipeline(pipeline);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -46,7 +45,7 @@ public class WebcamTest extends LinearOpMode {
             @Override
             public void onOpened()
             {
-                webcam.startStreaming(640,360, OpenCvCameraRotation.UPRIGHT);
+                webcam.startStreaming((int)pipeline.width,(int)pipeline.height, OpenCvCameraRotation.UPRIGHT);
             }
 
             @Override
@@ -55,16 +54,9 @@ public class WebcamTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            //centerPoints = pipeline.centerPoints;
+            objPoint = pipeline.realPoint;
+
         }
 
-    }
-    public ArrayList<Point> points2RealPoints(double realWidth, double realHeight, Point camPosRelative2TheCenterOfTheSubmersible, ArrayList<Point> points) {
-        Point camPos = camPosRelative2TheCenterOfTheSubmersible;
-        ArrayList<Point> newPoints = new ArrayList<>();
-        for (int i = 0; i<points.size(); i++){
-            newPoints.add(new Point(points.get(i).x/width * realWidth-camPos.x, points.get(i).y/height * realHeight-camPos.y));
-        }
-        return newPoints;
     }
 }

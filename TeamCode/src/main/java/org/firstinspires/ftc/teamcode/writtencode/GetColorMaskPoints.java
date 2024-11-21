@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class GetColorMaskPoints extends OpenCvPipeline {
-    public static int choice = 0;
+    public int choice = 0;
 
 
     public static int erosionSize = 7;
@@ -109,7 +109,7 @@ public class GetColorMaskPoints extends OpenCvPipeline {
 
     private double fovHDeg = 70.42;
 
-    public static double zReal = -12.5;
+    public double zReal = -12.5;
 
     private double fovVDeg = 43.3;
 
@@ -297,6 +297,10 @@ public class GetColorMaskPoints extends OpenCvPipeline {
             }
         }
         return bestContour;
+    }
+
+    public void setChoice(int val){
+        choice = val;
     }
 
 

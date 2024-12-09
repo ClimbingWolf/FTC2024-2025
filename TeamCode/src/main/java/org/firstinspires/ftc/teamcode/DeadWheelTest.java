@@ -1,50 +1,56 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver.GoBildaOdometryPods;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver.EncoderDirection;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp
+@Config
 public class DeadWheelTest extends LinearOpMode {
 
     FtcDashboard dash;
-    GoBildaPinpointDriver pin;
+
+    public static int MAX_TIME;
+    public static int MAX_SPEED;
+
+    public static boolean right;
+    public static boolean speedy;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dash = FtcDashboard.getInstance();
 
-        pin = hardwareMap.get(GoBildaPinpointDriver.class, "pin");
-        pin.setOffsets(7, 7);
-        pin.setEncoderResolution(GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pin.setEncoderDirections(EncoderDirection.FORWARD, EncoderDirection.FORWARD);
-        pin.resetPosAndIMU();
+        DcMotor fleft = hardwareMap.dcMotor.get("fleft");
+        DcMotor fright = hardwareMap.dcMotor.get("fright");
+        DcMotor bright = hardwareMap.dcMotor.get("bright");
+        DcMotor bleft = hardwareMap.dcMotor.get("bleft");
+
+        if (right) {
+            fright.setDirection(DcMotorSimple.Direction.REVERSE);
+            bright.setDirection(DcMotorSimple.Direction.REVERSE);
+            bleft.setDirection(DcMotorSimple.Direction.FORWARD);
+            fleft.setDirection(DcMotorSimple.Direction.FORWARD);
+        } else {
+            fleft.setDirection(DcMotorSimple.Direction.REVERSE);
+            bleft.setDirection(DcMotorSimple.Direction.REVERSE);
+            bright.setDirection(DcMotorSimple.Direction.FORWARD);
+            fright.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
 
         waitForStart();
         resetRuntime();
+        ElapsedTime spinTime = new ElapsedTime();
         while(opModeIsActive()) {
-            pin.update();
-            TelemetryPacket p = new TelemetryPacket();
-
-            Pose2D pos = pin.pos();
-            p.put("X", pos.getX(DistanceUnit.MM));
-            p.put("Y", pos.getY(DistanceUnit.MM));
-            p.put("Heading", pos.getHeading(AngleUnit.DEGREES));
-            p.put("Status", pin.getDeviceStatus());
-
-            
-
-            dash.sendTelemetryPacket(p);
+            double pow = Math.pow(2, spinTime.seconds() / MAX_TIME) - 1;
+            double speed = .5;
+            if (speedy) speed = 1;
+            fleft.setPower(speed);
+            bleft.setPower(-speed);
+            fright.setPower(-speed);
+            bright.setPower(speed);
         }
     }
 }

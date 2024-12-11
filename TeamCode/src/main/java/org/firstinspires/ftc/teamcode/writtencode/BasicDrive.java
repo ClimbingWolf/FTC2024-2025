@@ -38,6 +38,8 @@ public class BasicDrive extends LinearOpMode {
     public  double slidesMultiplier = 1;
     public double slidesPower = 0;
     public static double camOffsetDeg = 40;
+
+    public static boolean armMode = false;
     public  static double zOffsetCam = 5;
     //rightward offset from the arm
 
@@ -157,8 +159,8 @@ public class BasicDrive extends LinearOpMode {
             lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             firstAngle = lastAngles.firstAngle + offsetOrientation;
             //get the x and y position of the joystick relative to the player
-            y = FtcMath.rotateY(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
-            x = FtcMath.rotateX(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
+            y = FtcMath.rotateY(gamepad1.left_stick_x, gamepad1.left_stick_y, Math.toRadians(firstAngle));
+            x = FtcMath.rotateX(gamepad1.left_stick_x, gamepad1.left_stick_y, Math.toRadians(firstAngle));
             //double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             //double x = gamepad1.left_stick_x ; // Counteract imperfect strafing
             double rx = gamepad1.right_trigger - gamepad1.left_trigger;
@@ -178,48 +180,29 @@ public class BasicDrive extends LinearOpMode {
             leftSlide.setPower(slidesPower);
             rightSlide.setPower(slidesPower);
             //slidesController.moveSlides(slidesPower);
-            if(gamepad1.a){
-                if(aToggle) {
-                    aToggle = false;
-                    if(armSwitch) {
-                        armDown = true;
-                        xArm = 15;
-                        yArm = 5;
-                        zArm = 0;
-                        armController.moveToPos(xArm, yArm, zArm);
-                        armSwitch = false;
-                    }
-                    else{
-                        armDown = false;
-                        armSwitch = true;
-                    }
-                }
+            if(gamepad1.a && aToggle) {
+                aToggle = false;
+                armMode = !armMode;
+                zArm= 0;
+                xArm = 0;
             }
-
             else{
                 aToggle = true;
             }
 
-            if(activateClaw){
+            if(armMode) {
                 claw.setPower(-0.6);
-            }
-            else{
-                claw.setPower(0.2);
-            }
-            if(armDown) {
-                xArm += gamepad1.right_stick_y;
-                zArm += gamepad1.right_stick_x;
+                xArm += gamepad1.right_stick_y * 0.05;
+                zArm += gamepad1.right_stick_x * 0.05;
+                armController.moveToPos(xArm, 0, zArm);
                 if(gamepad1.b){
                     armController.moveToPos(xArm, -4, zArm);
-                    activateClaw = true;
                 }
             }
-            if(gamepad1.y){
-                activateClaw = false;
-            }
-            if(gamepad1.x){
-                armController.setTopRot(1.2);
-                armController.setBottomRot(0);
+            else{
+                armController.setBottomRot(1);
+                armController.setTopRot(1.05);
+                claw.setPower(0.2);
             }
 
         }

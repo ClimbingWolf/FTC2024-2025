@@ -34,7 +34,7 @@ public class SuperControlWithCamera extends LinearOpMode {
 
     public ArmServoHolder armController;
 
-    public  static double xOffsetCam = -6;
+    public  static double xOffsetCam = -7;
 
     public static double zMult = 1;
 
@@ -44,7 +44,7 @@ public class SuperControlWithCamera extends LinearOpMode {
     public double slidesPower = 0;
 
     public static double camOffsetDeg = 40;
-    public  static double zOffsetCam = 5;
+    public  static double zOffsetCam = 3;
     //rightward offset from the arm
 
     public  static double yOffsetCam = -13;
@@ -221,19 +221,22 @@ public class SuperControlWithCamera extends LinearOpMode {
                 diffyController.setPitchAndRollAngleDeg(pitchFinal, rollFinal);
             }
             if(gamepad1.dpad_down) {
-                armController.moveToPos((double)(objPoint.x + xOffsetCam), armY + 1.5, (double)(objPoint.y + zOffsetCam));
+                armController.moveToPos((double)(objPoint.x + xOffsetCam), armY + 1.5, (double)(-objPoint.y + zOffsetCam));
             }
             if(gamepad1.dpad_up) {
-                armController.moveToPos(objPoint.x + xOffsetCam, armY, zMult * (objPoint.y + zOffsetCam));
+                armController.moveToPos(objPoint.x + xOffsetCam, armY, zMult * (-objPoint.y + zOffsetCam));
             }
             if(gamepad1.y){
                 claw.setPower(0.6);
             }
-            if(gamepad1.x){
+            else if(gamepad1.x){
                 claw.setPower(-0.6);
             }
+            else{
+                claw.setPower(0);
+            }
             packet.put("pos", "" + objPoint.x +", " + objPoint.y);
-            packet.put("posAdjusted", "" + (objPoint.x + xOffsetCam) +", " + (zMult * (objPoint.y + zOffsetCam)));
+            packet.put("posAdjusted", "" + (objPoint.x + xOffsetCam) +", " + (zMult * (-objPoint.y + zOffsetCam)));
             dashboard.sendTelemetryPacket(packet);
         }
     }

@@ -16,20 +16,17 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.GetColorMaskPointsCopy;
-import org.firstinspires.ftc.teamcode.mathfunctions.FtcMath;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TestArmPos")
+@TeleOp(name = "Just Drive")
 @Config
-public class TestArmPos extends LinearOpMode {
+public class NothingButDrive extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
 
@@ -85,33 +82,17 @@ public class TestArmPos extends LinearOpMode {
     public DcMotor rightSlide;
     public DcMotor leftSlide;
 
-    GetColorMaskPointsCopy pipeline;
+    public CRServo gamingClaw;
+
+    public static double epicPower = 1;
+
+    //GetColorMaskPoints pipeline;
 
 
     @Override
     public void runOpMode() {
+        gamingClaw = hardwareMap.crservo.get("claw");
 
-        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        dashboard.startCameraStream(webcam, 0);
-        pipeline = new GetColorMaskPointsCopy();
-        webcam.setPipeline(pipeline);
-        pipeline.choice = colorChoice;//blue
-        pipeline.zReal = yOffsetCam;
-        pipeline.camAngleDeg = camOffsetDeg;
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming((int)pipeline.width,(int)pipeline.height, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
 
         topServos.add(hardwareMap.servo.get("topServo"));
         bottomServos.add(hardwareMap.servo.get("leftBottom"));
@@ -150,7 +131,6 @@ public class TestArmPos extends LinearOpMode {
         imu.initialize(parameters);
         waitForStart();
         while (opModeIsActive()) {
-            objPoint = pipeline.realPoint;
             //get the rotation of the robot and set it to angles
             lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             firstAngle = lastAngles.firstAngle + offsetOrientation;
@@ -169,17 +149,12 @@ public class TestArmPos extends LinearOpMode {
             double backLeftPower = (y - x + rx) / denominator;
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
-
+            gamingClaw.setPower(epicPower);
             fleft.setPower(frontLeftPower);
             bleft.setPower(backLeftPower);
             fright.setPower(frontRightPower);
             bright.setPower(backRightPower);
             dashboard.sendTelemetryPacket(packet);
-            if(gamepad1.a) {
-                armController.moveToPos(objPoint.x + xOffsetCam, armY + 2, -objPoint.y - zOffsetCam);
-            }
-            if(gamepad1.b)
-                armController.moveToPos(xReach, yReach, zReach);
             packet.put("pos", "" + objPoint.x +", " + objPoint.y);
             dashboard.sendTelemetryPacket(packet);
         }

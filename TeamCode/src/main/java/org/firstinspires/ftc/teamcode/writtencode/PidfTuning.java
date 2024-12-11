@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.writtencode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -16,59 +19,32 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.GetColorMaskPointsCopy;
-import org.firstinspires.ftc.teamcode.mathfunctions.FtcMath;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "TestArmPos")
+@TeleOp(name = "Tune PIDF")
 @Config
-public class TestArmPos extends LinearOpMode {
+public class PidfTuning extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
 
     public ArmServoHolder armController;
 
-    public CRServo clawServo;
-
-    public static double xOffsetCam = -7;
-
-    public static double camOffsetDeg = 35;
-    public static double zOffsetCam = 7;
-
-    public static double yOffsetCam = -12;
-    public static double setPosVal;
-
-    public static double bottomServoSet = 0;
-    public static double topServoSet = 0;
-    public static double movementSpeedmultiplier = 1;
     public FtcDashboard dashboard = FtcDashboard.getInstance();
     public TelemetryPacket packet = new TelemetryPacket();
     public double firstAngle = 0;
     public double y = 0;
     public double x = 0;
     public double rx = 0;
-    public static double offsetOrientation = 0;
+    public double offsetOrientation = 0;
 
-    public static double fleftMult = 1.0;
-    public static double bleftMult = 1.0;
 
-    public static double frightMult = 1.0;
-
-    public static double brightMult = 1.0;
-
-    public static double legLength = 8;
-
-    public static double xReach = 5;
-    public static double yReach = 0.1;
-
-    public static int colorChoice = 0;
+    public double legLength = 8;
 
 
     public ArrayList<Servo> topServos = new ArrayList<>();
@@ -76,47 +52,42 @@ public class TestArmPos extends LinearOpMode {
 
     public ArrayList<Servo> rotatorServos = new ArrayList<>();
 
-    public Point objPoint = new Point();
 
-    public static double armY = -4;
+    public CRServo gamingClaw;
 
-    public static double zReach;
+    public double epicPower = 1;
 
-    public DcMotor rightSlide;
-    public DcMotor leftSlide;
 
-    GetColorMaskPointsCopy pipeline;
+    public static double kPL = 0.1;
+    public static double kIL = 0.1;
+    public static double kDL = 0.1;
+    public static double kFL = 0.1;
+    public static double kPR = 0.1;
+    public static double kIR = 0.1;
+    public static double kDR = 0.1;
+    public static double kFR = 0.1;
+    public static double slidesPos = 0;
+
+    public SlidesController slidesController;
+
+    public MotorEx leftSlide;
+    public MotorEx rightSlide;
+
 
 
     @Override
     public void runOpMode() {
+        gamingClaw = hardwareMap.crservo.get("claw");
 
-        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        OpenCvWebcam webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        dashboard.startCameraStream(webcam, 0);
-        pipeline = new GetColorMaskPointsCopy();
-        webcam.setPipeline(pipeline);
-        pipeline.choice = colorChoice;//blue
-        pipeline.zReal = yOffsetCam;
-        pipeline.camAngleDeg = camOffsetDeg;
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming((int)pipeline.width,(int)pipeline.height, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {}
-        });
 
         topServos.add(hardwareMap.servo.get("topServo"));
         bottomServos.add(hardwareMap.servo.get("leftBottom"));
         bottomServos.add(hardwareMap.servo.get("rightBottom"));
         rotatorServos.add(hardwareMap.servo.get("bottomRotator"));
+        leftSlide = new MotorEx(hardwareMap, "leftSlide");
+        rightSlide = new MotorEx(hardwareMap, "rightSlide");
+        //leftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        slidesController = new SlidesController(rightSlide, leftSlide);
         //clawServo = hardwareMap.crservo.get("claw");
         //Declare the armcontroller
         armController = new ArmServoHolder(topServos, bottomServos, rotatorServos, legLength);
@@ -150,7 +121,7 @@ public class TestArmPos extends LinearOpMode {
         imu.initialize(parameters);
         waitForStart();
         while (opModeIsActive()) {
-            objPoint = pipeline.realPoint;
+            slidesController.setConstants(kPL ,kIL, kDL ,kFL, kPR, kIR, kDR, kFR);
             //get the rotation of the robot and set it to angles
             lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             firstAngle = lastAngles.firstAngle + offsetOrientation;
@@ -169,18 +140,14 @@ public class TestArmPos extends LinearOpMode {
             double backLeftPower = (y - x + rx) / denominator;
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
-
+            if(gamepad1.a){
+                slidesController.moveSlides(slidesPos);
+            }
             fleft.setPower(frontLeftPower);
             bleft.setPower(backLeftPower);
             fright.setPower(frontRightPower);
             bright.setPower(backRightPower);
             dashboard.sendTelemetryPacket(packet);
-            if(gamepad1.a) {
-                armController.moveToPos(objPoint.x + xOffsetCam, armY + 2, -objPoint.y - zOffsetCam);
-            }
-            if(gamepad1.b)
-                armController.moveToPos(xReach, yReach, zReach);
-            packet.put("pos", "" + objPoint.x +", " + objPoint.y);
             dashboard.sendTelemetryPacket(packet);
         }
     }

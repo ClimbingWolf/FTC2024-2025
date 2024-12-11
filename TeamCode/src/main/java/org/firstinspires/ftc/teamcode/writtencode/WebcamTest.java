@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.writtencode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.GetColorMaskPointsCopy;
 import org.firstinspires.ftc.teamcode.MaskByColor;
 import org.firstinspires.ftc.teamcode.mathfunctions.FtcMath;
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -33,11 +34,11 @@ public class WebcamTest extends LinearOpMode {
     public Point objPoint = new Point();
 
     OpenCvWebcam webcam;
-    GetColorMaskPoints pipeline;
+    GetColorMaskPointsCopy pipeline;
     public void runOpMode() {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new GetColorMaskPoints();
+        pipeline = new GetColorMaskPointsCopy();
         webcam.setPipeline(pipeline);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()

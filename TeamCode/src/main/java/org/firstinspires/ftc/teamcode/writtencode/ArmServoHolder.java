@@ -36,6 +36,14 @@ public class ArmServoHolder {
     public ArrayList<Double> rotatorServosEnds;
     public ArrayList<Double> rotatorServosStarts;
 
+    public double leftServoBottomMacro = 0;
+    public double rightServoBottomMacro = 0;
+    public double topServoMacro = 0;
+    public double rotatorServoMacro = 0;
+
+
+
+
     public ArrayList<Servo> rotatorServos;
 
     public double rotatorPercentage;
@@ -136,6 +144,14 @@ public class ArmServoHolder {
 
     }
 
+    public void epicPosMacro(){
+        bottomServos.get(0).setPosition(leftServoBottomMacro);
+        bottomServos.get(1).setPosition(rightServoBottomMacro);
+        topServos.get(0).setPosition(topServoMacro);
+        rotatorServos.get(0).setPosition(rotatorServoMacro);
+
+    }
+
 
 
 
@@ -159,19 +175,7 @@ public class ArmServoHolder {
         dash.sendTelemetryPacket(packet);
     }
 
-    public void outputServoPos() {
-        for (int i = 0; i < topServos.size(); i++) {
-            packet.put(topServos.get(i).getDeviceName(), topServos.get(i).getPosition());
-            packet.put(topServos.get(i).getDeviceName() + " Percentage", topTheta / (Math.PI));
-        }
-        for (int i = 0; i < bottomServos.size(); i++) {
-            packet.put(bottomServos.get(i).getDeviceName(), bottomServos.get(i).getPosition());
-            packet.put(bottomServos.get(i).getDeviceName() +" Percentage", bottomTheta / (Math.PI / 2));
-        }
 
-        dash.sendTelemetryPacket(packet);
-
-    }
 
     public void setTopRot(double percentage) {
         for (int i = 0; i < topServos.size(); i++) {
@@ -183,6 +187,14 @@ public class ArmServoHolder {
         for (int i = 0; i < bottomServos.size(); i++) {
             bottomServos.get(i).setPosition((bottomServoStarts.get(i) - bottomServoEnds.get(i)) * percentage + bottomServoEnds.get(i));
         }
+    }
+
+    public void outputServoPos(){
+        packet.put("bottomLeftPos", bottomServos.get(0).getPosition());
+        packet.put("bottomRightPos", bottomServos.get(1).getPosition());
+        packet.put("topPos", topServos.get(0).getPosition());
+        packet.put("rotatorPos", rotatorServos.get(0).getPosition());
+
     }
 }
 

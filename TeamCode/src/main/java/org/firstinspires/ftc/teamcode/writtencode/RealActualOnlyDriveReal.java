@@ -73,7 +73,7 @@ public class RealActualOnlyDriveReal extends LinearOpMode {
     public Point objPoint = new Point();
 
     OpenCvWebcam webcam;
-    GetColorMaskPoints pipeline;
+
 
 
     @Override
@@ -104,10 +104,10 @@ public class RealActualOnlyDriveReal extends LinearOpMode {
             lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             firstAngle = lastAngles.firstAngle + offsetOrientation;
             //get the x and y position of the joystick relative to the player
-            y = FtcMath.rotateY(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
-            x = FtcMath.rotateX(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
-            //y = gamepad1.left_stick_y;
-            //x = gamepad1.left_stick_x;
+            //y = FtcMath.rotateY(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
+            //x = FtcMath.rotateX(gamepad1.left_stick_x, -gamepad1.left_stick_y, Math.toRadians(firstAngle));
+            y = gamepad1.left_stick_y;
+            x = gamepad1.left_stick_x;
             rx = gamepad1.left_trigger-gamepad1.right_trigger;
             // basic teleop movement code
             bright.setPower((y-x-rx)*movementSpeedmultiplier * brightMult);

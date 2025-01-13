@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Vector;
 
 public class GetColorMaskPointsCopy extends OpenCvPipeline {
-    public int choice = 0;
+    public static int choice = 0;
 
 
     public static int erosionSize = 9;
@@ -245,6 +245,13 @@ public class GetColorMaskPointsCopy extends OpenCvPipeline {
         return (int) (Imgproc.contourArea(contour) / avgContourArea);
     }
 
+    public Point getCenterPoint(MatOfPoint contours){
+        Moments moments = Imgproc.moments(contours);
+        int cx = (int)(moments.get_m10() / moments.get_m00());
+        int cy = (int)(moments.get_m01() / moments.get_m00());
+        return new Point(cx, cy);
+    }
+
 
     public MatOfPoint getClosestContour(Point startPoint,  List<MatOfPoint> contours){
         double dist = 999999;
@@ -276,14 +283,8 @@ public class GetColorMaskPointsCopy extends OpenCvPipeline {
                 bestContour = contour;
             }
         }
-        dist = 99999;
-        minDist = 99999;
-        for (Point point : bestContour.toArray()) {
-            dist = Math.sqrt(Math.pow(point.x, 2) + Math.pow(point.y, 2));
-            if (dist < minDist) {
-                minDist = dist;
-                bestPoint = point;
-            }
+        if(minDist != 999999){
+            bestPoint = getCenterPoint(bestContour);
         }
         return bestPoint;
     }
@@ -342,11 +343,11 @@ public class GetColorMaskPointsCopy extends OpenCvPipeline {
             Imgproc.circle(input, closestPoint, 3, new Scalar(255,0,0), 2);
             Imgproc.circle(input, startPoint, 3, new Scalar(255,0,255), 5);
         }
+
         if(choice != 3)
             return input;
         else{
             return hsvMask;
         }
-
     }
 }

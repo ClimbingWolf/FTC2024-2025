@@ -32,20 +32,9 @@ public class BasicDrive extends LinearOpMode {
     BNO055IMU imu;
     Orientation lastAngles = new Orientation();
     public ArmServoHolder armController;
-    public  static double xOffsetCam = -5;
-    public static double zMult = 1;
-    //forwards offset from the arm
     public  double slidesMultiplier = 1;
     public double slidesPower = 0;
-    public static double camOffsetDeg = 40;
-
     public static boolean armMode = false;
-    public  static double zOffsetCam = 5;
-    //rightward offset from the arm
-
-    public  static double yOffsetCam = -13;
-    //vertical offset from the cam
-
     public FtcDashboard dashboard = FtcDashboard.getInstance();
     public TelemetryPacket packet = new TelemetryPacket();
     public double firstAngle = 0;
@@ -58,18 +47,8 @@ public class BasicDrive extends LinearOpMode {
     public Servo rightDiffy;
     public DiffyControllerServo diffyController;
 
-    public boolean armDown = false;
-
-    public static double pitchFinal = 270;
-    public static double rollFinal = 270;
-
 
     public static double legLength = 10.25;
-
-    public static double pitchInit = 90;
-    public static double rollInit = 90;
-
-    public SlidesController slidesController;
 
 
     public ArrayList<Servo> topServos = new ArrayList<>();
@@ -77,32 +56,18 @@ public class BasicDrive extends LinearOpMode {
 
     public ArrayList<Servo> rotatorServos = new ArrayList<>();
 
-    public Point objPoint = new Point();
-
-
-    public  static double armY = -5;
-
-    GetColorMaskPointsCopy pipeline;
 
     public DcMotor rightSlide;
     public DcMotor leftSlide;
 
     public CRServo claw;
-
-    public static int choice = 0;
-
     public static double topEnd = 0.75;
 
     public double zArm = 0;
-    public double xArm = 0;
 
     public double yArm = 0;
-
-    public boolean activateClaw = false;
-
+    public double xArm = 0;
     public boolean aToggle = false;
-
-    public boolean armSwitch = true;
 
     @Override
     public void runOpMode() {
@@ -154,7 +119,7 @@ public class BasicDrive extends LinearOpMode {
         diffyController = new DiffyControllerServo(leftDiffy, rightDiffy, 2);
         waitForStart();
         while (opModeIsActive()) {
-            slidesPower = (gamepad1.right_stick_x) * slidesMultiplier;
+            slidesPower = (gamepad1.left_bumper) ? 1:0 - ((gamepad1.right_bumper) ? 1:0) * slidesMultiplier;
             //get the rotation of the robot and set it to angles
             lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             firstAngle = lastAngles.firstAngle + offsetOrientation;
@@ -180,11 +145,13 @@ public class BasicDrive extends LinearOpMode {
             leftSlide.setPower(slidesPower);
             rightSlide.setPower(slidesPower);
             //slidesController.moveSlides(slidesPower);
-            if(gamepad1.a && aToggle) {
-                aToggle = false;
-                armMode = !armMode;
-                zArm= 0;
-                xArm = 0;
+            if(gamepad1.a) {
+                if(aToggle) {
+                    aToggle = false;
+                    armMode = !armMode;
+                    zArm = 0;
+                    xArm = 0;
+                }
             }
             else{
                 aToggle = true;
@@ -192,18 +159,18 @@ public class BasicDrive extends LinearOpMode {
 
             if(armMode) {
                 claw.setPower(-0.6);
-                xArm += gamepad1.right_stick_y * 0.05;
-                zArm += gamepad1.right_stick_x * 0.05;
-                armController.moveToPos(xArm, 0, zArm);
-                if(gamepad1.b){
-                    armController.moveToPos(xArm, -4, zArm);
-                }
+                xArm += ((gamepad1.dpad_left) ? 1:0 - ((gamepad1.dpad_right) ? 1:0)) * 0.05;
+                zArm += ((gamepad1.dpad_up) ? 1:0 - ((gamepad1.dpad_down) ? 1:0)) * 0.05;
+                yArm += ((gamepad1.y) ? 1:0 - ((gamepad1.x) ? 1:0)) * 0.05;
+                armController.moveToPos(xArm, yArm, zArm);
             }
             else{
-                armController.setBottomRot(1);
+                armController.setBottomRot(0.85);
                 armController.setTopRot(1.05);
                 claw.setPower(0.2);
             }
+            packet.put("pos", " " + xArm + ", " + yArm + ", " + zArm);
+
 
         }
     }

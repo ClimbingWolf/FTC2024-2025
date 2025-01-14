@@ -1,50 +1,41 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver.GoBildaOdometryPods;
-import org.firstinspires.ftc.teamcode.lib.GoBildaPinpointDriver.EncoderDirection;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
+@Config
 public class DeadWheelTest extends LinearOpMode {
-
     FtcDashboard dash;
-    GoBildaPinpointDriver pin;
+    DcMotor fleft;
+    DcMotor bleft;
+    DcMotor fright;
+    DcMotor bright;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dash = FtcDashboard.getInstance();
 
-        pin = hardwareMap.get(GoBildaPinpointDriver.class, "pin");
-        pin.setOffsets(7, 7);
-        pin.setEncoderResolution(GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pin.setEncoderDirections(EncoderDirection.FORWARD, EncoderDirection.FORWARD);
-        pin.resetPosAndIMU();
+        fleft = hardwareMap.dcMotor.get("fleft");
+        fright = hardwareMap.dcMotor.get("fright");
+        bleft = hardwareMap.dcMotor.get("bleft");
+        bright = hardwareMap.dcMotor.get("bright");
+
+        fleft.setDirection(DcMotorSimple.Direction.REVERSE);
+        bleft.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        dash = FtcDashboard.getInstance();
 
         waitForStart();
         resetRuntime();
         while(opModeIsActive()) {
-            pin.update();
-            TelemetryPacket p = new TelemetryPacket();
+            TelemetryPacket t = new TelemetryPacket();
 
-            Pose2D pos = pin.pos();
-            p.put("X", pos.getX(DistanceUnit.MM));
-            p.put("Y", pos.getY(DistanceUnit.MM));
-            p.put("Heading", pos.getHeading(AngleUnit.DEGREES));
-            p.put("Status", pin.getDeviceStatus());
-
-            
-
-            dash.sendTelemetryPacket(p);
+            dash.sendTelemetryPacket(t);
         }
     }
 }

@@ -73,15 +73,15 @@ public class Init {
     public OpenCvCamera webcam;
     public int cameraMonitorViewId;
 
-    public static boolean fieldCentric = false;
+    public static boolean fieldCentric = true;
     public double yPickup;
     public static double dist = 0;
     public Point objPoint = new Point();
     public FtcDashboard dashboard;
     public GetColorMaskPointsCopy pipeline = new GetColorMaskPointsCopy();
     public static int colorChoice = 0;
-    public static double yOffsetCam = -11;
-    public static double camOffsetDeg = 32;
+    public static double yOffsetCam = -13;
+    public static double camOffsetDeg = 30;
     public static double clawClose = 0.17;
     public static double clawOpen = 0.5;
 
@@ -94,37 +94,42 @@ public class Init {
 
 
 
-    public static double xOffsetCam = 1;
-    public static double zOffsetCam = 5;
+    public static double xOffsetCam = 10;
+    public static double zOffsetCam = 6;
     public static double pickupConst = 100;
 
     public boolean manualOverdrive = false;
 
+    public boolean useWebcam = true;
+
     public Init(Gamepad gamepad, boolean write, String fileDest, HardwareMap hardwareMap){
         controllerOffsetX = 0;
         controllerOffsetZ = 0;
+        if(!useWebcam){
+            manualOverdrive = true;
+        }
 
         dashboard = FtcDashboard.getInstance();
-        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        dashboard.startCameraStream(webcam, 0);
-
-        webcam.setPipeline(pipeline);
-        pipeline.choice = colorChoice;//blue
-        pipeline.zReal = yOffsetCam;
-        pipeline.camAngleDeg = camOffsetDeg;
-
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
+        if(useWebcam){
+            cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+            dashboard.startCameraStream(webcam, 0);
+            webcam.setPipeline(pipeline);
+            pipeline.choice = colorChoice;//blue
+            pipeline.zReal = yOffsetCam;
+            pipeline.camAngleDeg = camOffsetDeg;
+            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
             {
-                webcam.startStreaming((int)pipeline.width,(int)pipeline.height, OpenCvCameraRotation.UPRIGHT);
-            }
+                @Override
+                public void onOpened()
+                {
+                    webcam.startStreaming((int)pipeline.width,(int)pipeline.height, OpenCvCameraRotation.UPRIGHT);
+                }
 
-            @Override
-            public void onError(int errorCode) {}
-        });
+                @Override
+                public void onError(int errorCode) {}
+            });
+        }
         dash = FtcDashboard.getInstance();
         byteDataArr = new ArrayList<String>();
         orientationDataArr = new ArrayList<String>();
@@ -172,11 +177,11 @@ public class Init {
         firstAngle = -lastAngles.firstAngle;
         //get the x and y position of the joystick relative to the player
         if(fieldCentric) {
-            y = FtcMath.rotateY(-virtualGamepad.left_stick_x, virtualGamepad.left_stick_y, Math.toRadians(firstAngle));
-            x = FtcMath.rotateX(-virtualGamepad.left_stick_x, virtualGamepad.left_stick_y, Math.toRadians(firstAngle));
+            y = FtcMath.rotateY(-virtualGamepad.left_stick_x, -virtualGamepad.left_stick_y, Math.toRadians(firstAngle));
+            x = FtcMath.rotateX(-virtualGamepad.left_stick_x, -virtualGamepad.left_stick_y, Math.toRadians(firstAngle));
         }
         else {
-            y = virtualGamepad.left_stick_y; // Remember, Y stick value is reversed
+            y = -virtualGamepad.left_stick_y; // Remember, Y stick value is reversed
             x = -virtualGamepad.left_stick_x; // Counteract imperfect strafing
         }
         double rx = virtualGamepad.left_trigger - virtualGamepad.right_trigger + leftAddedPower;
@@ -285,8 +290,4 @@ public class Init {
         }
     }
 
-    public void adjustRot(double orientation){
-        double angleDiff = -Math.toRadians(orientation) + Math.toRadians(firstAngle);
-        leftAddedPower = (Math.abs(angleDiff) > Math.PI) ? -angleDiff/5:0;
-    }
 }

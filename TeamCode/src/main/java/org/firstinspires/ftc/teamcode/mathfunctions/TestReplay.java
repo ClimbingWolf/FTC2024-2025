@@ -76,7 +76,7 @@ public class TestReplay extends LinearOpMode {
         dash = FtcDashboard.getInstance();
         byteArrList = readParseFile(fullFileDest);
         orientationArrList = readParseFileNoBytes(orientationFile);
-        init = new Init(tempGamepad, false, fullFileDest, hardwareMap);
+        init = new Init(tempGamepad, true, fullFileDest, hardwareMap);
         //packet.put("data", orientationArrList.toString());
         dash.sendTelemetryPacket(packet);
         waitForStart();
@@ -84,7 +84,6 @@ public class TestReplay extends LinearOpMode {
             frame +=1;
             if(frame < byteArrList.size()) {
                 init.updateGamepad((byte[])byteArrList.get(frame));
-                init.adjustRot(Double.parseDouble((String)(orientationArrList.get(frame))));
                 dash.sendTelemetryPacket(packet);
                 init.loop();
             }

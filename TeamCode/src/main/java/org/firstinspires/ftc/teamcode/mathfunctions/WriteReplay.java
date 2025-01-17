@@ -75,13 +75,11 @@ public class WriteReplay extends LinearOpMode {
         init = new Init(gamepad1, writeData, fullFileDest, hardwareMap);
         waitForStart();
         while (opModeIsActive()) {
-                init.virtualGamepad = gamepad1;
-                init.loop();
-                //writeToFile("" + firstAngle, "orientation.txt");
-            if(gamepad1.a) {
-                init.pushDataToFile();
-            }
+            init.virtualGamepad = gamepad1;
+            init.loop();
+            //writeToFile("" + firstAngle, "orientation.txt");
         }
+        init.pushDataToFile();
 
     }
 

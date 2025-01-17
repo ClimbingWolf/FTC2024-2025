@@ -55,17 +55,30 @@ public class TestSillArmPos extends LinearOpMode {
     public static double zOffsetCam = 7;
     public Point objPoint;
     public Init init;
+    public static double rotatorPos = 0.5;
+    public static double pitchPos = 0.5;
+
+
 
 
     @Override
     public void runOpMode() {
-        init = new Init(gamepad1, false, "", hardwareMap);
-
+        //init = new Init(gamepad1, false, "", hardwareMap);
+        //rotator end => 0.59
+        //rotator start => 0.04
         //packet.put("data", orientationArrList.toString());
+        rotator = hardwareMap.servo.get("rotator");
+        pitch = hardwareMap.servo.get("pitch");
         waitForStart();
         while (opModeIsActive()) {
-            init.virtualGamepad = gamepad1;
-            init.loop();
+            if(gamepad1.a) {
+                rotator.setPosition(rotatorPos);
+            }
+            if(gamepad1.b){
+                pitch.setPosition(pitchPos);
+            }
+            //init.virtualGamepad = gamepad1;
+            //init.loop();
             //packet.put("push pos", push.getCurrentPosition());
             //dash.sendTelemetryPacket(packet);
         }

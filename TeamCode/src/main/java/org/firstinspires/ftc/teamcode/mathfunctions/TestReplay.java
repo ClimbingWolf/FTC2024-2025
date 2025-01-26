@@ -43,6 +43,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.dataFunctions.Init;
+import org.firstinspires.ftc.teamcode.dataFunctions.InitExceptTheArmIsCompletelyBroken;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -53,7 +54,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "STUPID CODE STUPID HATE")
+@Autonomous(name = "REPLAYredLeft")
 @Config
 public class TestReplay extends LinearOpMode {
     public int frame = -1;
@@ -61,14 +62,14 @@ public class TestReplay extends LinearOpMode {
     public ArrayList orientationArrList = new ArrayList();
     public volatile Gamepad tempGamepad = new Gamepad();
 
-    public String filename = "silly";
+    public static String filename = "redLeft";
 
 
     public String fileStart = "byteData/";
 
     public String fullFileDest = fileStart + filename + ".txt";
     public String orientationFile = fullFileDest.substring(0, fullFileDest.length()-4) + "Orientation.txt";
-    public Init init;
+    public InitExceptTheArmIsCompletelyBroken init;
     public FtcDashboard dash;
     public TelemetryPacket packet = new TelemetryPacket();
     @Override
@@ -76,7 +77,7 @@ public class TestReplay extends LinearOpMode {
         dash = FtcDashboard.getInstance();
         byteArrList = readParseFile(fullFileDest);
         orientationArrList = readParseFileNoBytes(orientationFile);
-        init = new Init(tempGamepad, true, fullFileDest, hardwareMap);
+        init = new InitExceptTheArmIsCompletelyBroken(tempGamepad, true, fullFileDest, hardwareMap);
         //packet.put("data", orientationArrList.toString());
         dash.sendTelemetryPacket(packet);
         waitForStart();

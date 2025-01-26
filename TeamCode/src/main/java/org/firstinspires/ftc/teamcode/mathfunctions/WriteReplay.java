@@ -42,6 +42,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.dataFunctions.Init;
+import org.firstinspires.ftc.teamcode.dataFunctions.InitExceptTheArmIsCompletelyBroken;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -60,7 +61,7 @@ public class WriteReplay extends LinearOpMode {
 
     public static boolean writeData = true;
 
-    public String filename = "silly";
+    public static String filename = "redLeft";
 
     public String readData;
 
@@ -68,14 +69,14 @@ public class WriteReplay extends LinearOpMode {
 
     public String fullFileDest = fileStart + filename + ".txt";
     public String orientationFile = fullFileDest.substring(0, fullFileDest.length()-4) + "Orientation.txt";
-    public Init init;
+    public InitExceptTheArmIsCompletelyBroken init;
 
     @Override
     public void runOpMode() {
-        init = new Init(gamepad1, writeData, fullFileDest, hardwareMap);
+        init = new InitExceptTheArmIsCompletelyBroken(gamepad1, writeData, fullFileDest, hardwareMap);
         waitForStart();
+        init.virtualGamepad = gamepad1;
         while (opModeIsActive()) {
-            init.virtualGamepad = gamepad1;
             init.loop();
             //writeToFile("" + firstAngle, "orientation.txt");
         }

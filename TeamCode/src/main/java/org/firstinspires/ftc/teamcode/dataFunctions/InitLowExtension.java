@@ -1,42 +1,37 @@
 package org.firstinspires.ftc.teamcode.dataFunctions;
+
 import static org.firstinspires.ftc.teamcode.WriteFile.byteArr2String;
 import static org.firstinspires.ftc.teamcode.mathfunctions.ReadWriteFile.writeToFile;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.GetColorMaskPointsCopy;
-import org.firstinspires.ftc.teamcode.mathfunctions.FtcMath;
 import com.acmerobotics.dashboard.FtcDashboard;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import java.util.ArrayList;
-import org.ejml.dense.row.FMatrixComponent;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.GetColorMaskPointsCopy;
+import org.firstinspires.ftc.teamcode.mathfunctions.FtcMath;
 import org.firstinspires.ftc.teamcode.writtencode.ExtenderController;
 import org.opencv.core.Point;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-import kotlin.UByteArray;
+import java.util.ArrayList;
 
 @Config
-public class Init {
+public class InitLowExtension {
     public DcMotor bright;
     public DcMotor bleft;
     public BNO055IMU imu;
@@ -45,13 +40,14 @@ public class Init {
     public DcMotor fleft;
     public MotorEx push;
     public Servo pitch;
-    public ExtenderController extenderController;
-    
+    public boolean getSample = false;
+    public ExtenderControllerLowExtension extenderController;
+
     public Servo rotator;
 
     public FtcDashboard dash;
     public TelemetryPacket packet =new TelemetryPacket();;
-    
+
     public Gamepad virtualGamepad;
 
     public Orientation lastAngles;
@@ -74,6 +70,8 @@ public class Init {
     public int cameraMonitorViewId;
 
     public static boolean fieldCentric = true;
+
+    public String team = "blue";
     public double yPickup;
     public static double dist = 0;
     public Point objPoint = new Point();
@@ -99,11 +97,11 @@ public class Init {
     public static double zOffsetCam = 6;
     public static double pickupConst = 100;
 
-    public boolean manualOverdrive = true;
+    public boolean manualOverdrive = false;
 
-    public boolean useWebcam = false;
+    public boolean useWebcam = true;
 
-    public Init(Gamepad gamepad, boolean write, String fileDest, HardwareMap hardwareMap){
+    public InitLowExtension(Gamepad gamepad, boolean write, String fileDest, HardwareMap hardwareMap){
         controllerOffsetX = 0;
         controllerOffsetZ = 0;
         if(!useWebcam){
@@ -149,7 +147,7 @@ public class Init {
         fright= hardwareMap.dcMotor.get("fright");
         fleft = hardwareMap.dcMotor.get("fleft");
         rotator = hardwareMap.servo.get("rotator");
-        extenderController = new ExtenderController(rotator, pitch, push);
+        extenderController = new ExtenderControllerLowExtension(rotator, pitch, push);
         fleft.setDirection(DcMotorSimple.Direction.FORWARD);
         fright.setDirection(DcMotorSimple.Direction.REVERSE);
         bleft.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -166,7 +164,7 @@ public class Init {
         imu.initialize(parameters);
         claw = hardwareMap.servo.get("claw");
         push.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        extenderController = new ExtenderController(rotator, pitch, push);
+        extenderController = new ExtenderControllerLowExtension(rotator, pitch, push);
     }
     public void updateGamepad(byte[] byteArray){
         virtualGamepad.fromByteArray(byteArray);
@@ -204,12 +202,40 @@ public class Init {
         if(virtualGamepad.left_bumper && virtualGamepad.right_bumper && virtualGamepad.left_trigger > 0.5 && virtualGamepad.right_trigger > 0.5){
             manualOverdrive = true;
         }
-        if(virtualGamepad.a) {
-            if(!manualOverdrive) {
-                extenderController.setPos(objPoint.x + xOffsetCam + controllerOffsetX, yPickup, objPoint.y + zOffsetCam + controllerOffsetZ);
+        if((virtualGamepad.a || virtualGamepad.y) && objPoint.x >0) {
+            if(virtualGamepad.y){
+                pipeline.choice = 2;
+            }
+            else if (team.equals("blue")){
+                pipeline.choice = 1;
             }
             else{
-                extenderController.setPos(10 + controllerOffsetX, yPickup,0 + controllerOffsetZ);
+                pipeline.choice = 0;
+            }
+            if(!manualOverdrive) {
+                if((extenderController.dist > 15) || (getSample == true)){
+                    yPickup = -8.2;
+                    extenderController.setPos(objPoint.x + xOffsetCam + controllerOffsetX, yPickup, objPoint.y + zOffsetCam + controllerOffsetZ);
+                    getSample = true;
+                    fleft.setPower(0);
+                    bleft.setPower(0);
+                    bright.setPower(0);
+                    fright.setPower(0);
+                }
+                else {
+                    getSample = false;
+                    objPoint = pipeline.realPoint;
+                    extenderController.setPos(objPoint.x + xOffsetCam + controllerOffsetX, yPickup, objPoint.y + zOffsetCam + controllerOffsetZ);
+                    if (extenderController.dist <= 16) {
+                        fleft.setPower(-0.3 * (dist - 18) / 18);
+                        bleft.setPower(-0.3 * (dist - 18) / 18);
+                        bright.setPower(-0.3 * (dist - 18) / 18);
+                        fright.setPower(-0.3 *(dist - 18) / 18);
+                    }
+                }
+            }
+            else{
+                extenderController.setPos(10 + xOffsetCam, yPickup,0 + zOffsetCam);
             }
             if(virtualGamepad.x){
                 yPickup = -3.5;
@@ -221,15 +247,17 @@ public class Init {
         else{
             controllerOffsetX = 0;
             controllerOffsetZ = 0;
+            claw.setPosition(clawClose);
             yPickup = 0;
             objPoint = pipeline.realPoint;
         }
 
         if(virtualGamepad.b){
-
             extenderController.setRotatorRot(0.5);
+
+
             if(virtualGamepad.dpad_up){
-                extenderController.pidfPush(28);
+                extenderController.pidfPush(22);
                 extenderController.setPitchRot(0.9);
 
             }
@@ -248,7 +276,7 @@ public class Init {
             }
         }
         else if(virtualGamepad.x){
-            extenderController.setPitchRot(-0.1);
+            extenderController.setPitchRot(0.2);
         }
         if(virtualGamepad.right_bumper){
             claw.setPosition(clawOpen);

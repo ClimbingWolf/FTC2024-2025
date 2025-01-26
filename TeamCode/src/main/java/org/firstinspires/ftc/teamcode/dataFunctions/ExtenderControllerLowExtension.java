@@ -1,28 +1,23 @@
-package org.firstinspires.ftc.teamcode.writtencode;
+package org.firstinspires.ftc.teamcode.dataFunctions;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 
 @Config
-public class ExtenderController {
+public class ExtenderControllerLowExtension {
 
 
     public TelemetryPacket packet = new TelemetryPacket();
 
     public double legLength;
 
-    public double ticksPerRev = 537.6 * 0.703 * 0.527472; //this changes with the motor so just test it
+    public double ticksPerRev = 537.6 * 0.703; //this changes with the motor so just test it
     //also it might not actually be ticksPerRev idk, but it works
 
     public double spoolDiameter = 3.3019685; //inches
@@ -41,11 +36,11 @@ public class ExtenderController {
     public MotorEx push;
 
     public PIDController pidController;
-    public double pitchStart = 0.38;
-    public double pitchEnd =0.1;
+    public double pitchStart = -0.15;
+    public double pitchEnd =0.35;
     public double power;
-    public double rotEnd =0.77;
-    public double rotStart =0.485;
+    public double rotEnd =0.485;
+    public double rotStart =0.2;
     //pitch vertical => 0
     //pitch horizontal => 0.53
     //rotator fullLeft => 0.2
@@ -61,7 +56,7 @@ public class ExtenderController {
     public double rotatorTheta;
     public double pitchAngle;
 
-    public ExtenderController(Servo rotator, Servo pitch, MotorEx push){
+    public ExtenderControllerLowExtension(Servo rotator, Servo pitch, MotorEx push){
         this.rotator = rotator;
         this.pitch = pitch;
         this.push = push;
@@ -80,7 +75,7 @@ public class ExtenderController {
 
     public void pidfPush(double dist){
         pidController.setSetPoint(dist/inPerRev * ticksPerRev);
-        power = pidController.calculate(push.getCurrentPosition());
+        power = pidController.calculate(push.getCurrentPosition()) *0.2;
         push.setVelocity(power);
     }
 
@@ -96,7 +91,7 @@ public class ExtenderController {
         flatDist = Math.sqrt(x*x + z*z);
         pitchAngle = Math.atan(y/flatDist);
         rotatorTheta = 0;
-        if(dist < 20 + 16 && dist >= 16){
+        if(dist < 26 && dist >= 16){
             pidfPush(dist-16);
             setPitchRot(pitchAngle/(Math.PI/2));
             if(z !=0){

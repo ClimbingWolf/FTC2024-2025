@@ -1,33 +1,28 @@
-package org.firstinspires.ftc.teamcode.writtencode;
+package org.firstinspires.ftc.teamcode.dataFunctions;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.ArrayList;
 
 @Config
-public class ExtenderController {
+public class ExtenderControllerBrokenArm {
 
 
     public TelemetryPacket packet = new TelemetryPacket();
 
     public double legLength;
 
-    public double ticksPerRev = 537.6 * 0.703 * 0.527472; //this changes with the motor so just test it
+    //public double ticksPerRev = 537.6 * 0.703; //this changes with the motor so just test it
     //also it might not actually be ticksPerRev idk, but it works
 
-    public double spoolDiameter = 3.3019685; //inches
+    //public double spoolDiameter = 3.3019685; //inches
 
-    public double inPerRev = spoolDiameter * Math.PI;
+    //public double inPerRev = spoolDiameter * Math.PI;
 
 
     public ArrayList<Servo> topServos;
@@ -38,14 +33,14 @@ public class ExtenderController {
 
     public Servo rotator;
     public Servo pitch;
-    public MotorEx push;
+    //public MotorEx push;
 
     public PIDController pidController;
-    public double pitchStart = 0.38;
-    public double pitchEnd =0.1;
+    public double pitchStart = 0.2;
+    public double pitchEnd =0.42;
     public double power;
-    public double rotEnd =0.77;
-    public double rotStart =0.485;
+    public double rotEnd =0.485;
+    public double rotStart =0.2;
     //pitch vertical => 0
     //pitch horizontal => 0.53
     //rotator fullLeft => 0.2
@@ -61,13 +56,12 @@ public class ExtenderController {
     public double rotatorTheta;
     public double pitchAngle;
 
-    public ExtenderController(Servo rotator, Servo pitch, MotorEx push){
+    public ExtenderControllerBrokenArm(Servo rotator, Servo pitch){
         this.rotator = rotator;
         this.pitch = pitch;
-        this.push = push;
-        push.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        push.stopAndResetEncoder();
-        push.setInverted(true);
+        //push.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        //push.stopAndResetEncoder();
+        //push.setInverted(true);
         this.pidController = new PIDController(kP, kI, kD);
     }
 
@@ -78,11 +72,6 @@ public class ExtenderController {
 
     }
 
-    public void pidfPush(double dist){
-        pidController.setSetPoint(dist/inPerRev * ticksPerRev);
-        power = pidController.calculate(push.getCurrentPosition());
-        push.setVelocity(power);
-    }
 
     public void setPitchRot(double percentage) {
         pitch.setPosition(pitchEnd + (pitchStart - pitchEnd) * percentage);
@@ -92,17 +81,27 @@ public class ExtenderController {
     }
 
     public void setPos(double x, double y, double z){
-        dist = Math.sqrt(x*x + y*y + z*z);
+        dist = Math.sqrt(x*x + 81 + z*z); //beecause the arm has to move down
         flatDist = Math.sqrt(x*x + z*z);
         pitchAngle = Math.atan(y/flatDist);
         rotatorTheta = 0;
-        if(dist < 20 + 16 && dist >= 16){
-            pidfPush(dist-16);
-            setPitchRot(pitchAngle/(Math.PI/2));
+        if(dist <= 17){
+            if(y==0){
+                pitch.setPosition(0.35);
+            }
+            else {
+                pitch.setPosition(0.4);
+            }
             if(z !=0){
-                rotatorTheta = Math.atan(z/x);
+                rotatorTheta = Math.atan(z/Math.sqrt(17*17 - z*z));
             }
             double rotatorPercentage = (rotatorTheta + Math.toRadians(rotatorServoRangeDegrees/2))/Math.toRadians(rotatorServoRangeDegrees);
+            if(rotatorPercentage > 0.7){
+                rotatorPercentage = 0.7;
+            }
+            else if(rotatorPercentage < 0.3){
+                rotatorPercentage = 0.3;
+            }
             setRotatorRot(rotatorPercentage);
         }
 

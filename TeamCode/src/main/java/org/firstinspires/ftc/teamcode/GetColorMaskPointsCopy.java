@@ -30,14 +30,14 @@ import java.util.List;
 import java.util.Vector;
 
 public class GetColorMaskPointsCopy extends OpenCvPipeline {
-    public static int choice = 0;
+    public int choice = 0;
 
 
     public static int erosionSize = 9;
 
     private int dilusionSize = 0;
     public double width = 320;
-    public double height = width/16 * 9;
+    public double height = width/4 * 3;
     public Mat endMat = new Mat();
 
     public Point realPoint = new Point();

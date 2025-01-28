@@ -53,7 +53,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "WRITE STUPID")
+@TeleOp(name = "Write Replay")
 @Config
 public class WriteReplay extends LinearOpMode {
     public int frame = 0;

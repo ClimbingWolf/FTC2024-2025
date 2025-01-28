@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.writtencode.ExtenderController;
 
 import java.util.ArrayList;
 
-@TeleOp(name = "ARM POSITION SERVO PITCH PUSH")
+@TeleOp(name = "EVIL TELEOP")
 @Config
 public class TestSillArmPos extends LinearOpMode {
 

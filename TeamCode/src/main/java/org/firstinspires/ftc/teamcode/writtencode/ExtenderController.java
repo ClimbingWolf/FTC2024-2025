@@ -56,6 +56,7 @@ public class ExtenderController {
     public double kP =120;
     public double kI = 0;
     public double kD = 0.7;
+    public static double armFromGround = 9.5;
     public double dist;
     public double flatDist;
     public double rotatorTheta;
@@ -79,6 +80,7 @@ public class ExtenderController {
     }
 
     public void pidfPush(double dist){
+        dist = dist - 16;
         pidController.setSetPoint(dist/inPerRev * ticksPerRev);
         power = pidController.calculate(push.getCurrentPosition());
         push.setVelocity(power);
@@ -92,11 +94,18 @@ public class ExtenderController {
     }
 
     public void setPos(double x, double y, double z){
+        if(x > 8){
+            x =8;
+        }
+        else if (x<-8){
+            x = -8;
+        }
+        y = y - armFromGround;
         dist = Math.sqrt(x*x + y*y + z*z);
         flatDist = Math.sqrt(x*x + z*z);
         pitchAngle = Math.atan(y/flatDist);
         rotatorTheta = 0;
-        if(dist < 20 + 16 && dist >= 16){
+        if(dist < 25 + 16 && dist >= 16){
             pidfPush(dist-16);
             setPitchRot(pitchAngle/(Math.PI/2));
             if(z !=0){

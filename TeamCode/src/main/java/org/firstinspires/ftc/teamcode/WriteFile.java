@@ -4,6 +4,7 @@ import java.io.File;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 @Autonomous(name = "WriteFile")
 @Config
+@Disabled
 public class WriteFile extends LinearOpMode {
 
     private BNO055IMU imu;

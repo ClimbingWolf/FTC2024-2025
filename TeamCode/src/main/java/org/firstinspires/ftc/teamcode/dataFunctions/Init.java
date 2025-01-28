@@ -59,6 +59,7 @@ public class Init {
     public double y;
     public double x;
     public boolean write;
+    public double servoPitch = 0;
     public ArrayList<String> byteDataArr;
     public ArrayList<String> orientationDataArr;
 
@@ -80,7 +81,10 @@ public class Init {
     public FtcDashboard dashboard;
     public GetColorMaskPointsCopy pipeline = new GetColorMaskPointsCopy();
     public static int colorChoice = 0;
+
+    public static double rotatorRot = 0.5;
     public static double yOffsetCam = -13;
+    public static double yArmToFloor = 8;
     public static double camOffsetDeg = 30;
     public static double clawClose = 0.17;
     public static double clawOpen = 0.5;
@@ -172,7 +176,7 @@ public class Init {
         virtualGamepad.fromByteArray(byteArray);
     }
     public void loop(){
-
+        extenderController.setPitchRot(servoPitch);
         //get the rotation of the robot and set it to angles
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         firstAngle = -lastAngles.firstAngle;
@@ -209,7 +213,7 @@ public class Init {
                 extenderController.setPos(objPoint.x + xOffsetCam + controllerOffsetX, yPickup, objPoint.y + zOffsetCam + controllerOffsetZ);
             }
             else{
-                extenderController.setPos(10 + controllerOffsetX, yPickup,0 + controllerOffsetZ);
+                extenderController.setPos(xReach, yReach,zReach);
             }
             if(virtualGamepad.x){
                 yPickup = -3.5;
@@ -226,29 +230,42 @@ public class Init {
         }
 
         if(virtualGamepad.b){
-
-            extenderController.setRotatorRot(0.5);
+            if(servoPitch < 0.9) {
+                servoPitch += 0.01;
+            }
+            else{
+                if(rotatorRot < 1.5) {
+                    rotatorRot += 0.01;
+                }
+                else{
+                    rotatorRot = 1.5;
+                }
+                servoPitch = 0.9;
+            }
             if(virtualGamepad.dpad_up){
-                extenderController.pidfPush(28);
-                extenderController.setPitchRot(0.9);
-
+                extenderController.pidfPush(43);
             }
-            else if(virtualGamepad.dpad_left){
-                extenderController.pidfPush(10);
-                extenderController.setPitchRot(0.5);
+            if(virtualGamepad.dpad_right){
+                extenderController.pidfPush(27);
             }
-            else if (virtualGamepad.dpad_right){
-                extenderController.pidfPush(0);
-                extenderController.setPitchRot(0.35);
-
-            }
-            else if (virtualGamepad.dpad_down){
-                extenderController.setPitchRot(0.385);
-
+            if(virtualGamepad.dpad_down){
+                extenderController.pidfPush(17);
             }
         }
-        else if(virtualGamepad.x){
-            extenderController.setPitchRot(-0.1);
+        else if(virtualGamepad.x && servoPitch == 0){
+            servoPitch = -0.05;
+        }
+        else if(servoPitch > 0 && rotatorRot == 0.5){
+            servoPitch -= 0.05;
+        }
+        if (rotatorRot > 0.5 && !virtualGamepad.b){
+            rotatorRot -= 0.05;
+        }
+        else if (rotatorRot < 0.5){
+            rotatorRot = 0.5;
+        }
+        else{
+            servoPitch = 0;
         }
         if(virtualGamepad.right_bumper){
             claw.setPosition(clawOpen);

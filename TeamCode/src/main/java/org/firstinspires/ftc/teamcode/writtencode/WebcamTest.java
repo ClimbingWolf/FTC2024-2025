@@ -41,6 +41,9 @@ public class WebcamTest extends LinearOpMode {
         pipeline = new GetColorMaskPointsCopy();
         webcam.setPipeline(pipeline);
 
+        // Through a null pointer exception for some reason
+
+        /*
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
@@ -52,6 +55,7 @@ public class WebcamTest extends LinearOpMode {
             @Override
             public void onError(int errorCode) {}
         });
+        */
         waitForStart();
 
         while (opModeIsActive()) {

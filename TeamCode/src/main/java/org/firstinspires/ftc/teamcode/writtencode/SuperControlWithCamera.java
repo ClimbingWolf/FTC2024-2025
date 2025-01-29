@@ -26,6 +26,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
 
+/*
 @TeleOp(name = "ඞWebcamSuperControlඞඞඞඞඞඞඞඞඞ")
 @Config
 public class SuperControlWithCamera extends LinearOpMode {
@@ -241,3 +242,4 @@ public class SuperControlWithCamera extends LinearOpMode {
         }
     }
 }
+*/

@@ -1,26 +1,16 @@
 package org.firstinspires.ftc.teamcode.dataFunctions;
 
-import static org.firstinspires.ftc.teamcode.mathfunctions.ReadWriteFile.readParseFile;
-import static org.firstinspires.ftc.teamcode.mathfunctions.ReadWriteFile.readParseFileNoBytes;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
+
 import org.opencv.core.Point;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Gamepad;
+
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.writtencode.ExtenderController;
-
-import java.util.ArrayList;
 
 @TeleOp(name = "__SadTeleOpRED")
 @Config

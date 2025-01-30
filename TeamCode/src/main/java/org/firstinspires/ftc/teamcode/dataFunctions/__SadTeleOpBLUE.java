@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.writtencode.ExtenderController;
 import org.opencv.core.Point;
 
 @TeleOp(name = "__SadTeleOpBLUE")

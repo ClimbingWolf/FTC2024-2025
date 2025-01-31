@@ -6,14 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.opencv.core.Point;
 
-import com.qualcomm.robotcore.hardware.Servo;
-
-@TeleOp(name = "EVIL TELEOP")
+@TeleOp(name = "TEST PITCH ROT")
 @Config
-public class TestSillArmPos extends LinearOpMode {
+public class TestPitchRot extends LinearOpMode {
 
     public Servo pitch;
     public Servo rotator;
@@ -53,7 +52,7 @@ public class TestSillArmPos extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        init = new Init(gamepad1, false, "", hardwareMap);
+        //init = new Init(gamepad1, false, "", hardwareMap);
         //rotator end => 0.59
         //rotator start => 0.04
         //packet.put("data", orientationArrList.toString());
@@ -61,8 +60,14 @@ public class TestSillArmPos extends LinearOpMode {
         pitch = hardwareMap.servo.get("pitch");
         waitForStart();
         while (opModeIsActive()) {
-            init.virtualGamepad = gamepad1;
-            init.loop();
+            if(gamepad1.a){
+                pitch.setPosition(pitchPos);
+            }
+            if (gamepad1.b){
+                rotator.setPosition(rotatorPos);
+            }
+            //init.virtualGamepad = gamepad1;
+            //init.loop();
         }
     }
 }

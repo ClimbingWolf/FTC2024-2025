@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.writtencode;
+package org.firstinspires.ftc.teamcode.dataFunctions;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -19,6 +19,10 @@ public class ExtenderController {
 
 
     public TelemetryPacket packet = new TelemetryPacket();
+
+    public FtcDashboard dash;
+
+
 
     public double legLength;
 
@@ -44,8 +48,8 @@ public class ExtenderController {
     public double pitchStart = 0.38;
     public double pitchEnd =0.1;
     public double power;
-    public double rotEnd =0.77;
-    public double rotStart =0.485;
+    public double rotEnd =0.73;
+    public double rotStart =0.17;
     //pitch vertical => 0
     //pitch horizontal => 0.53
     //rotator fullLeft => 0.2
@@ -56,12 +60,14 @@ public class ExtenderController {
     public double kP =120;
     public double kI = 0;
     public double kD = 0.7;
+    public static double armFromGround = 0;
     public double dist;
     public double flatDist;
     public double rotatorTheta;
     public double pitchAngle;
 
     public ExtenderController(Servo rotator, Servo pitch, MotorEx push){
+        dash = FtcDashboard.getInstance();
         this.rotator = rotator;
         this.pitch = pitch;
         this.push = push;
@@ -79,7 +85,7 @@ public class ExtenderController {
     }
 
     public void pidfPush(double dist){
-        pidController.setSetPoint(dist/inPerRev * ticksPerRev);
+        pidController.setSetPoint((dist - 16)/inPerRev * ticksPerRev);
         power = pidController.calculate(push.getCurrentPosition());
         push.setVelocity(power);
     }
@@ -92,12 +98,22 @@ public class ExtenderController {
     }
 
     public void setPos(double x, double y, double z){
+        x = x+16;
+        if(z > 8){
+            z =8;
+        }
+        else if (z<-8){
+            z = -8;
+        }
+        y = y - armFromGround;
         dist = Math.sqrt(x*x + y*y + z*z);
         flatDist = Math.sqrt(x*x + z*z);
         pitchAngle = Math.atan(y/flatDist);
         rotatorTheta = 0;
-        if(dist < 20 + 16 && dist >= 16){
-            pidfPush(dist-16);
+
+
+        if(dist < (25 + 16) && dist >= 16){
+            pidfPush(dist);
             setPitchRot(pitchAngle/(Math.PI/2));
             if(z !=0){
                 rotatorTheta = Math.atan(z/x);

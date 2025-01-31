@@ -102,7 +102,6 @@ public class TestArmPos extends LinearOpMode {
         pipeline.choice = colorChoice;//blue
         pipeline.zReal = yOffsetCam;
         pipeline.camAngleDeg = camOffsetDeg;
-
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override

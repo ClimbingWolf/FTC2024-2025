@@ -65,6 +65,7 @@ public class Init {
 
     public static double xReach = 20;
     public static double yReach = 5;
+    public static double sideCamOffsetDeg = -20;
     public double leftAddedPower = 0;
     public static double zReach = 0.1;
     public OpenCvCamera webcam;
@@ -79,9 +80,9 @@ public class Init {
     public  int colorChoice = 0;
 
     public  double rotatorRot = 0.5;
-    public  double yOffsetCam = -13;
+    public  static double yOffsetCam = -8;
     public  double yArmToFloor = 8;
-    public  double camOffsetDeg = 30;
+    public  static double camOffsetDeg = 20;
     public static double clawClose = 0.03;
     public static double clawOpen = 0.3;
 
@@ -95,13 +96,13 @@ public class Init {
 
 
 
-    public  double xOffsetCam = 10;
-    public  double zOffsetCam = 6;
+    public  static double xOffsetCam = -8.5;
+    public  static double zOffsetCam = 6;
     public  double pickupConst = 100;
 
     public boolean manualOverdrive = true;
 
-    public boolean useWebcam = false;
+    public boolean useWebcam = true;
 
     public double pidfGoal = 16;
 
@@ -139,6 +140,11 @@ public class Init {
     public static double servoSpeed = 0.07;
 
     public double powerMult = 1;
+
+    public static double focalLenX = 0.1;
+
+    public double zReal;
+    public double xReal;
 
 
 
@@ -246,8 +252,8 @@ public class Init {
         // This ensures all the powers maintain the same ratio,
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-        if(virtualGamepad.right_stick_button){
-            powerMult = 0.3;
+        if(virtualGamepad.left_bumper){
+            powerMult = 0.2;
         }
         else{
             powerMult = 1;
@@ -274,12 +280,12 @@ public class Init {
             manualOverdrive = true;
         }
         if(virtualGamepad.a) {
-            extenderController.setPos(xReach, yReach,zReach);
+            extenderController.setPos(xReal-16, yPickup, -zReal);
             if(virtualGamepad.x){
-                yPickup = -3.5;
+                yPickup = -8;
             }
             else{
-                yPickup = 1;
+                yPickup = 0;
             }
         }
         else{
@@ -287,6 +293,11 @@ public class Init {
             controllerOffsetZ = 0;
             yPickup = 0;
             objPoint = pipeline.realPoint;
+            zReal = FtcMath.rotateY(objPoint.y, objPoint.x, Math.toRadians(sideCamOffsetDeg)) - zOffsetCam;
+            xReal = FtcMath.rotateX(objPoint.y, objPoint.x, Math.toRadians(sideCamOffsetDeg)) - xOffsetCam;
+            packet.put("RealZ", zReal);
+            packet.put("RealX", xReal);
+            //idk which is which I just guessed until it worked
         }
 
         if(virtualGamepad.b){
@@ -349,6 +360,7 @@ public class Init {
         packet.put("yPos", drive.getPoseEstimate().getY());
         packet.put("Heading", drive.getPoseEstimate().getHeading());
         dash.sendTelemetryPacket(packet);
+        virtualGamepad.a = true;
     }
 
     public void goToPoint(double targetX, double targetY, double targetHeading, Pose2d pose){

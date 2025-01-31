@@ -99,6 +99,9 @@ public class GetColorMaskPointsCopy extends OpenCvPipeline {
 
     public double camRotateSideDeg = 20;
 
+    double xMult = 1;
+    double yMult = 1;
+
 
 
 
@@ -207,19 +210,47 @@ public class GetColorMaskPointsCopy extends OpenCvPipeline {
         cx, cy : float
         Principal point offsets (pixels)
         */
-        double fx = focalLen;
-        double fy = focalLen;
+        //double fx = focalLen;
+        //double fy = focalLen;
         double cx = width/2;
         double cy = height/2;
-        double z = ((1.0/Math.cos(Math.toRadians(camAngleDeg)) * zReal/(-fy *xConst4Cam * Math.tan(Math.toRadians(camAngleDeg))/(camPoint.y-cy)-1)));
-        double X = -fy * z * xConst4Cam/(camPoint.y - cy);
-        double Y = -(camPoint.x-cx) * z * yConst4Cam/(camPoint.y - cy);
-        X = Math.sqrt(Math.pow(X,2)- Math.pow(zReal,2));
-        double rotatedX = FtcMath.rotateX(X, -Y, Math.toRadians(-camRotateSideDeg));
-        double rotatedY = FtcMath.rotateY(X, -Y, Math.toRadians(-camRotateSideDeg));
+        double fx = width;
+        double fy = height;
+        //double z = ((1.0/Math.cos(Math.toRadians(camAngleDeg)) * zReal/(-fy *xConst4Cam * Math.tan(Math.toRadians(camAngleDeg))/(camPoint.y-cy)-1)));
+        //double X = -fy * z * xConst4Cam/(camPoint.y - cy);
+        //double Y = -(camPoint.x-cx) * z * yConst4Cam/(camPoint.y - cy);
+        //X = Math.sqrt(Math.pow(X,2)- Math.pow(zReal,2));
+        //double rotatedX = FtcMath.rotateX(X, -Y, Math.toRadians(-camRotateSideDeg));
+        //double rotatedY = FtcMath.rotateY(X, -Y, Math.toRadians(-camRotateSideDeg));
+        // Camera tilt (20 degrees downward)
+        // Given real-world Y coordinate
+        double worldY = zReal;
 
+        // Camera tilt angle in radians (20 degrees downward)
+        double tiltAngle = Math.toRadians(20);
 
-        return new Point(rotatedX, rotatedY);
+        // Camera intrinsic parameters (assumed values)
+
+        // 2D point in image space (input)
+        double pixelX = camPoint.x;
+        double pixelY = camPoint.y;
+
+        // Convert 2D pixel to normalized camera coordinates
+        double camX = (pixelX - cx) / fx;
+        double camY = (pixelY - cy) / fy;
+        double camZ = 1.0; // Assume the camera is looking straight ahead before rotation
+
+        // Compute new Y and Z directions after applying tilt angle
+        double worldYDirection = camY * Math.cos(tiltAngle) + camZ * Math.sin(tiltAngle);
+        double worldZDirection = camZ * Math.cos(tiltAngle) - camY * Math.sin(tiltAngle);
+
+        // Solve for scale factor S to make world Y = -8.5
+        double scale = worldY / worldYDirection;
+
+        // Compute final world coordinates
+        double worldX = camX * scale;
+        double worldZ = worldZDirection * scale;
+        return new Point(worldX * 5.0/5.5, worldZ *-1.0);
     }
 
     public List<MatOfPoint> simplifyContours(List<MatOfPoint> contours) {
